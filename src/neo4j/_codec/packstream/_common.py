@@ -16,29 +16,32 @@
 # limitations under the License.
 
 
-class Structure:
+try:
+    from fast_packstream import BoltStruct as Structure
+except ImportError:
+    class Structure:
 
-    def __init__(self, tag, *fields):
-        self.tag = tag
-        self.fields = list(fields)
+        def __init__(self, tag, *fields):
+            self.tag = tag
+            self.fields = list(fields)
 
-    def __repr__(self):
-        return "Structure[0x%02X](%s)" % (ord(self.tag), ", ".join(map(repr, self.fields)))
+        def __repr__(self):
+            return "Structure[0x%02X](%s)" % (ord(self.tag), ", ".join(map(repr, self.fields)))
 
-    def __eq__(self, other):
-        try:
-            return self.tag == other.tag and self.fields == other.fields
-        except AttributeError:
-            return False
+        def __eq__(self, other):
+            try:
+                return self.tag == other.tag and self.fields == other.fields
+            except AttributeError:
+                return False
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+        def __ne__(self, other):
+            return not self.__eq__(other)
 
-    def __len__(self):
-        return len(self.fields)
+        def __len__(self):
+            return len(self.fields)
 
-    def __getitem__(self, key):
-        return self.fields[key]
+        def __getitem__(self, key):
+            return self.fields[key]
 
-    def __setitem__(self, key, value):
-        self.fields[key] = value
+        def __setitem__(self, key, value):
+            self.fields[key] = value

@@ -30,7 +30,7 @@ from ...._optional_deps import (
 )
 from ...hydration import DehydrationHooks
 from .._common import Structure
-
+from fast_packstream import read as fspr
 
 NONE_VALUES: t.Tuple = (None,)
 TRUE_VALUES: t.Tuple = (True,)
@@ -284,6 +284,7 @@ class PackableBuffer:
         return bool(self._tmp_buffering)
 
 
+
 class Unpacker:
 
     def __init__(self, unpackable):
@@ -299,10 +300,9 @@ class Unpacker:
         return self.unpackable.read_u8()
 
     def unpack(self, hydration_hooks=None):
-        value = self._unpack(hydration_hooks=hydration_hooks)
-        if hydration_hooks and type(value) in hydration_hooks:
-            return hydration_hooks[type(value)](value)
-        return value
+        (v, i) = fspr(self.unpackable.data, self.unpackable.p, hydration_hooks)
+        self.unpackable.p = i
+        return v
 
     def _unpack(self, hydration_hooks=None):
         marker = self.read_u8()
@@ -466,7 +466,8 @@ class Unpacker:
             signature = self.read(1).tobytes()
             return marker & 0x0F, signature
         else:
-            raise ValueError("Expected structure, found marker %02X" % marker)
+            raise ValueError(
+                "Expected structure, found marker %02X" % marker)
 
     @staticmethod
     def new_unpackable_buffer():
